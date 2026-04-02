@@ -111,8 +111,7 @@ public class TokenProvider {
         };
         claims.get("authorities", List.class).stream().forEach(consumer);
         User userDetails = userRepository.findByUserName(userName);
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = createSecurityContexHolder(userDetails, authorities, request);
-        return usernamePasswordAuthenticationToken;
+        return createSecurityContexHolder(userDetails, authorities, request);
     }
 
     private UsernamePasswordAuthenticationToken createSecurityContexHolder(User userDetails, List<SimpleGrantedAuthority> authorities, HttpServletRequest request) {

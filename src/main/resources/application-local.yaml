@@ -13,7 +13,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: none
     show-sql: true
     properties:
       hibernate:
@@ -25,6 +25,3 @@ wingstars:
   jwtRefreshTokenSecret: makeSuperSecretStringThatSoDifficultToGuessAndSoLongThatNoOneCanRemember1000WordsXRQmTFFJ95m359028m5235b259n02qbnq56
   jwtExpiration: 3600000  #miliseconds
   jwtExpirationRefreshToken: 43200000 #miliseconds
-  allowed-origins: >
-    http://localhost:3000,
-    http://localhost:4000

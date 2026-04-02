@@ -32,8 +32,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     private final JwtTokenUtils jwtTokenUtils;
     private final UserRepository userRepository;
 
-    private final String MESSAGE_END_LOGIN_SESSION = "Login session expired, please contact admin";
-
 
     @Override
     public void logout(String username) {
@@ -44,6 +42,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     public Map<String, String> refreshToken(String username, RefreshTokenRequest refreshTokenRequest) {
+        String MESSAGE_END_LOGIN_SESSION = "Login session expired, please contact admin";
         try {
             jwtTokenUtils.validateRefreshJwtToken(refreshTokenRequest.getRefreshToken());
             RefreshToken refreshToken = refreshTokenRepository.findByRefreshTokenCode(refreshTokenRequest.getRefreshToken());
@@ -55,11 +54,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             List<GrantedAuthority> authorities = Collections.
                     singletonList(new SimpleGrantedAuthority(user.getRole().name()));
             String token = Jwts.builder()
-                    .setClaims(claims)
-                    .setSubject(username)
-                    .setIssuedAt(new Date())
-                    .addClaims(Map.of("authorities", authorities))
-                    .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs)).signWith(jwtTokenUtils.getKey()).compact();
+                    .claims(claims)
+                    .subject(username)
+                    .issuedAt(new Date())
+                    .expiration(new Date((new Date()).getTime() + jwtExpirationMs)).signWith(jwtTokenUtils.getKey()).compact();
             String refreshTokenNew = jwtTokenUtils.generateJwtTokenRefresh();
             refreshToken.setRefreshTokenCode(refreshTokenNew);
             refreshToken.setExpiryDate(Instant.now().plusMillis(jwtExpirationRefreshToken));

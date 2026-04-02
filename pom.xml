@@ -6,7 +6,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.2.12</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
     <groupId>wingstars</groupId>
     <artifactId>wingstars-backend</artifactId>
@@ -64,7 +64,7 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
-            <version>0.12.6</version>  <!-- đổi từ 0.11.5 → 0.12.6 -->
+            <version>0.12.6</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-gson</artifactId>
-            <version>0.12.6</version>  <!-- đổi từ 0.11.5 → 0.12.6 -->
+            <version>0.12.6</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>

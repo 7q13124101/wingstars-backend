@@ -1,5 +1,6 @@
 package wingstars.backend.sercurity.jwt;
 
+import java.io.Serial;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
@@ -7,14 +8,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class WeakConcurrentHashMap<K, V> extends ConcurrentHashMap<K, V> {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     private static final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss:SSS");
     private final Map<K, Long> timeMap = new ConcurrentHashMap<K, Long>();
     private long expiryInMillis = 1000;
-
-    public WeakConcurrentHashMap() {
-        initialize();
-    }
 
     public WeakConcurrentHashMap(long expiryInMillis) {
         this.expiryInMillis = expiryInMillis;
