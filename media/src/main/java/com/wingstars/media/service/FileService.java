@@ -6,6 +6,8 @@ import com.wingstars.media.enums.ModuleSource;
 import com.wingstars.media.repository.MediaAssetRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -71,12 +73,7 @@ public class FileService {
                     .build();
             asset = mediaAssetRepository.save(asset);
 
-            return MediaUploadResponse.builder()
-                    .mediaId(asset.getId())
-                    .fileUrl(asset.getFileUrl())
-                    .moduleSource(asset.getModuleSource() == null ? null : asset.getModuleSource().name())
-                    .title(asset.getTitle())
-                    .build();
+            return toUploadResponse(asset);
         } catch (IOException ex) {
             throw new RuntimeException("Could not store file. Please try again!", ex);
         }
@@ -85,10 +82,31 @@ public class FileService {
     @Transactional
     public void softDeleteFile(Long id) {
         MediaAsset asset = mediaAssetRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new RuntimeException("File không tồn tại hoặc đã bị xóa!"));
+                .orElseThrow(() -> new RuntimeException("File does not exist or has already been deleted"));
 
         asset.setIsDeleted(true);
         mediaAssetRepository.save(asset);
+    }
+
+    public Page<MediaUploadResponse> getFiles(ModuleSource moduleSource, Pageable pageable) {
+        Page<MediaAsset> assets;
+
+        if (moduleSource != null) {
+            assets = mediaAssetRepository.findByModuleSourceAndIsDeletedFalse(moduleSource, pageable);
+        } else {
+            assets = mediaAssetRepository.findAllByIsDeletedFalse(pageable);
+        }
+
+        return assets.map(this::toUploadResponse);
+    }
+
+    private MediaUploadResponse toUploadResponse(MediaAsset asset) {
+        return MediaUploadResponse.builder()
+                .mediaId(asset.getId())
+                .fileUrl(asset.getFileUrl())
+                .moduleSource(asset.getModuleSource() == null ? null : asset.getModuleSource().name())
+                .title(asset.getTitle())
+                .build();
     }
 
     private String resolveFolderName(ModuleSource moduleSource) {
