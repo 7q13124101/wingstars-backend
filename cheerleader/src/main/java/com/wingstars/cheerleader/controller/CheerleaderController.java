@@ -35,6 +35,11 @@ public class CheerleaderController {
         return ResponseEntity.ok(ApiResponse.success(cheerleaderService.getAll(search, page, size)));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<CheerleaderResponse>> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(cheerleaderService.getById(id)));
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<CheerleaderResponse>> create(@Valid @RequestBody CheerleaderRequest request) {

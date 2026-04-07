@@ -35,6 +35,14 @@ public class CheerleaderServiceImpl implements CheerleaderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public CheerleaderResponse getById(Long id) {
+        Cheerleader idol = cheerleaderRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new RuntimeException("Cheerleader does not exist or has been deleted"));
+        return toResponse(idol);
+    }
+
+    @Override
     @Transactional
     public CheerleaderResponse create(CheerleaderRequest request) {
         Cheerleader cheerleader = modelMapper.map(request, Cheerleader.class);
