@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,6 +42,16 @@ public class FileController {
     public ResponseEntity<ApiResponse<Void>> deleteFile(@PathVariable Long id) {
         fileService.softDeleteFile(id);
         return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    // TODO: Add @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<MediaUploadResponse>> replaceFile(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file
+    ) {
+        MediaUploadResponse response = fileService.replaceFile(id, file);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping

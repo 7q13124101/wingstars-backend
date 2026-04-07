@@ -33,6 +33,73 @@ public class FileService {
     private String uploadDir;
 
     public MediaUploadResponse uploadFile(MultipartFile file, ModuleSource moduleSource) {
+        StoredFile storedFile = storePhysicalFile(file, moduleSource);
+
+        try {
+            MediaAsset asset = MediaAsset.builder()
+                    .fileUrl(storedFile.fileUrl())
+                    .moduleSource(moduleSource)
+                    .title(storedFile.originalFilename())
+                    .isActive(true)
+                    .isDeleted(false)
+                    .build();
+            asset = mediaAssetRepository.save(asset);
+
+            return toUploadResponse(asset);
+        } catch (RuntimeException ex) {
+            deletePhysicalFile(storedFile.fileUrl());
+            throw ex;
+        }
+    }
+
+    @Transactional
+    public void softDeleteFile(Long id) {
+        MediaAsset asset = mediaAssetRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new RuntimeException("File does not exist or has already been deleted"));
+
+        asset.setIsDeleted(true);
+        mediaAssetRepository.save(asset);
+    }
+
+    public Page<MediaUploadResponse> getFiles(ModuleSource moduleSource, Pageable pageable) {
+        Page<MediaAsset> assets;
+
+        if (moduleSource != null) {
+            assets = mediaAssetRepository.findByModuleSourceAndIsDeletedFalse(moduleSource, pageable);
+        } else {
+            assets = mediaAssetRepository.findAllByIsDeletedFalse(pageable);
+        }
+
+        return assets.map(this::toUploadResponse);
+    }
+
+    @Transactional
+    public MediaUploadResponse replaceFile(Long id, MultipartFile newFile) {
+        MediaAsset asset = mediaAssetRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new RuntimeException("File does not exist"));
+
+        String oldFileUrl = asset.getFileUrl();
+        StoredFile storedFile = storePhysicalFile(newFile, asset.getModuleSource());
+
+        deletePhysicalFile(oldFileUrl);
+
+        asset.setFileUrl(storedFile.fileUrl());
+        asset.setTitle(storedFile.originalFilename());
+        asset = mediaAssetRepository.save(asset);
+
+        return toUploadResponse(asset);
+    }
+
+    private MediaUploadResponse toUploadResponse(MediaAsset asset) {
+        return MediaUploadResponse.builder()
+                .mediaId(asset.getId())
+                .fileUrl(asset.getFileUrl())
+                .moduleSource(asset.getModuleSource() == null ? null : asset.getModuleSource().name())
+                .title(asset.getTitle())
+                .build();
+    }
+
+    private StoredFile storePhysicalFile(MultipartFile file, ModuleSource moduleSource) {
         if (file == null || file.isEmpty()) {
             throw new RuntimeException("File is empty");
         }
@@ -63,50 +130,24 @@ public class FileService {
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
             String fileUrl = "/uploads/" + folderName + "/" + storedName;
-
-            MediaAsset asset = MediaAsset.builder()
-                    .fileUrl(fileUrl)
-                    .moduleSource(moduleSource)
-                    .title(originalFilename)
-                    .isActive(true)
-                    .isDeleted(false)
-                    .build();
-            asset = mediaAssetRepository.save(asset);
-
-            return toUploadResponse(asset);
+            return new StoredFile(fileUrl, originalFilename);
         } catch (IOException ex) {
             throw new RuntimeException("Could not store file. Please try again!", ex);
         }
     }
 
-    @Transactional
-    public void softDeleteFile(Long id) {
-        MediaAsset asset = mediaAssetRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new RuntimeException("File does not exist or has already been deleted"));
-
-        asset.setIsDeleted(true);
-        mediaAssetRepository.save(asset);
-    }
-
-    public Page<MediaUploadResponse> getFiles(ModuleSource moduleSource, Pageable pageable) {
-        Page<MediaAsset> assets;
-
-        if (moduleSource != null) {
-            assets = mediaAssetRepository.findByModuleSourceAndIsDeletedFalse(moduleSource, pageable);
-        } else {
-            assets = mediaAssetRepository.findAllByIsDeletedFalse(pageable);
+    private void deletePhysicalFile(String fileUrl) {
+        if (!StringUtils.hasText(fileUrl)) {
+            return;
         }
 
-        return assets.map(this::toUploadResponse);
-    }
-
-    private MediaUploadResponse toUploadResponse(MediaAsset asset) {
-        return MediaUploadResponse.builder()
-                .mediaId(asset.getId())
-                .fileUrl(asset.getFileUrl())
-                .moduleSource(asset.getModuleSource() == null ? null : asset.getModuleSource().name())
-                .title(asset.getTitle())
-                .build();
+        try {
+            String relativePath = fileUrl.startsWith("/uploads/") ? fileUrl.substring("/uploads/".length()) : fileUrl;
+            Path filePath = Paths.get(uploadDir).resolve(relativePath).normalize();
+            Files.deleteIfExists(filePath);
+        } catch (IOException ex) {
+            System.err.println("Could not delete old physical file: " + fileUrl);
+        }
     }
 
     private String resolveFolderName(ModuleSource moduleSource) {
@@ -117,5 +158,8 @@ public class FileService {
         return moduleSource.name()
                 .toLowerCase(Locale.ROOT)
                 .replaceAll("[^a-z0-9_-]", "_");
+    }
+
+    private record StoredFile(String fileUrl, String originalFilename) {
     }
 }
