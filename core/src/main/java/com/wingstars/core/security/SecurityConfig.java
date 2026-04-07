@@ -53,7 +53,14 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/cheerleaders/**", "/api/files/**", "/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/cheerleaders/**", "/api/files/**", "/api/ranking-categories/**", "/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/ranking-categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/ranking-categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/ranking-categories/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/ranking-entries/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/ranking-entries/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/ranking-entries/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/admin/ranking-categories/**").hasRole("ADMIN")
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api/auth/**", "/error").permitAll()
                         .anyRequest().authenticated());
 
