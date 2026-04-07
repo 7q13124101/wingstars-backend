@@ -45,11 +45,28 @@ public class CheerleaderServiceImpl implements CheerleaderService {
     @Override
     @Transactional
     public CheerleaderResponse update(Long id, CheerleaderRequest request) {
-        Cheerleader cheerleader = cheerleaderRepository.findByIdAndIsDeletedFalse(id)
+        Cheerleader existingIdol = cheerleaderRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new RuntimeException("Cheerleader does not exist or has been deleted"));
 
-        modelMapper.map(request, cheerleader);
-        return toResponse(cheerleaderRepository.save(cheerleader));
+        String oldAvatarUrl = existingIdol.getAvatarUrl();
+        String oldAudioUrl = existingIdol.getExclusiveAudioUrl();
+        String oldFrameUrl = existingIdol.getPhotoFrameUrl();
+
+        modelMapper.getConfiguration().setSkipNullEnabled(true);
+        modelMapper.map(request, existingIdol);
+
+        if (!StringUtils.hasText(request.getAvatarUrl())) {
+            existingIdol.setAvatarUrl(oldAvatarUrl);
+        }
+        if (!StringUtils.hasText(request.getExclusiveAudioUrl())) {
+            existingIdol.setExclusiveAudioUrl(oldAudioUrl);
+        }
+        if (!StringUtils.hasText(request.getPhotoFrameUrl())) {
+            existingIdol.setPhotoFrameUrl(oldFrameUrl);
+        }
+
+        Cheerleader updatedIdol = cheerleaderRepository.save(existingIdol);
+        return toResponse(updatedIdol);
     }
 
     @Override
