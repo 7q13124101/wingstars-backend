@@ -1,6 +1,7 @@
 package com.wingstars.auth.controller;
 
 import com.wingstars.auth.dto.request.LoginRequest;
+import com.wingstars.auth.dto.request.RefreshTokenRequest;
 import com.wingstars.auth.dto.request.RegisterRequest;
 import com.wingstars.auth.dto.response.AuthResponse;
 import com.wingstars.auth.service.AuthService;
@@ -44,6 +45,20 @@ public class AuthController {
         ApiResponse<AuthResponse> response = ApiResponse.<AuthResponse>builder()
                 .status(200)
                 .message("Login successful")
+                .data(authResponse)
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        AuthResponse authResponse = authService.refreshToken(request.getRefreshToken());
+
+        ApiResponse<AuthResponse> response = ApiResponse.<AuthResponse>builder()
+                .status(200)
+                .message("Token refreshed successfully")
                 .data(authResponse)
                 .timestamp(LocalDateTime.now())
                 .build();

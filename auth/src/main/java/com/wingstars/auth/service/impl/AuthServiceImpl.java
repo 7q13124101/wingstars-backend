@@ -103,4 +103,29 @@ public class AuthServiceImpl implements AuthService {
                 .tokenType("Bearer")
                 .build();
     }
+
+    @Override
+    @Transactional
+    public AuthResponse refreshToken(String refreshToken) {
+        RefreshToken storedToken = refreshTokenRepository.findByToken(refreshToken)
+                .orElseThrow(() -> new RuntimeException("Refresh token is invalid"));
+
+        if (Boolean.TRUE.equals(storedToken.getRevoked())) {
+            throw new RuntimeException("Refresh token has been revoked");
+        }
+
+        if (storedToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            storedToken.setRevoked(true);
+            refreshTokenRepository.save(storedToken);
+            throw new RuntimeException("Refresh token has expired");
+        }
+
+        String accessToken = jwtTokenProvider.generateAccessToken(storedToken.getUser());
+
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(storedToken.getToken())
+                .tokenType("Bearer")
+                .build();
+    }
 }
