@@ -7,6 +7,7 @@ import com.wingstars.media.repository.MediaAssetRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -79,6 +80,15 @@ public class FileService {
         } catch (IOException ex) {
             throw new RuntimeException("Could not store file. Please try again!", ex);
         }
+    }
+
+    @Transactional
+    public void softDeleteFile(Long id) {
+        MediaAsset asset = mediaAssetRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new RuntimeException("File không tồn tại hoặc đã bị xóa!"));
+
+        asset.setIsDeleted(true);
+        mediaAssetRepository.save(asset);
     }
 
     private String resolveFolderName(ModuleSource moduleSource) {
