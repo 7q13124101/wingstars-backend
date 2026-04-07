@@ -1,8 +1,11 @@
 package com.wingstars.media.entity;
 
 import com.wingstars.core.entity.BaseEntity;
+import com.wingstars.media.enums.ModuleSource;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -28,9 +31,9 @@ public class MediaAsset extends BaseEntity {
     @Column(name = "file_url", nullable = false, unique = true, length = 500)
     private String fileUrl;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "module_source", length = 50)
-    // BANNER, CHEERLEADER, NEWS...
-    private String moduleSource;
+    private ModuleSource moduleSource;
 
     @Column(length = 255)
     private String title;

@@ -1,6 +1,8 @@
 package com.wingstars.media.service;
 
+import com.wingstars.media.dto.MediaUploadResponse;
 import com.wingstars.media.entity.MediaAsset;
+import com.wingstars.media.enums.ModuleSource;
 import com.wingstars.media.repository.MediaAssetRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -27,7 +29,7 @@ public class FileService {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    public String uploadFile(MultipartFile file, String moduleSource) {
+    public MediaUploadResponse uploadFile(MultipartFile file, ModuleSource moduleSource) {
         if (file == null || file.isEmpty()) {
             throw new RuntimeException("File is empty");
         }
@@ -66,21 +68,25 @@ public class FileService {
                     .isActive(true)
                     .isDeleted(false)
                     .build();
-            mediaAssetRepository.save(asset);
+            asset = mediaAssetRepository.save(asset);
 
-            return fileUrl;
+            return MediaUploadResponse.builder()
+                    .mediaId(asset.getId())
+                    .fileUrl(asset.getFileUrl())
+                    .moduleSource(asset.getModuleSource() == null ? null : asset.getModuleSource().name())
+                    .title(asset.getTitle())
+                    .build();
         } catch (IOException ex) {
             throw new RuntimeException("Could not store file. Please try again!", ex);
         }
     }
 
-    private String resolveFolderName(String moduleSource) {
-        if (!StringUtils.hasText(moduleSource)) {
+    private String resolveFolderName(ModuleSource moduleSource) {
+        if (moduleSource == null) {
             return "common";
         }
 
-        return moduleSource
-                .trim()
+        return moduleSource.name()
                 .toLowerCase(Locale.ROOT)
                 .replaceAll("[^a-z0-9_-]", "_");
     }
