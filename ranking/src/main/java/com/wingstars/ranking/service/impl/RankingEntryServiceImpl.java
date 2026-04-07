@@ -27,7 +27,7 @@ public class RankingEntryServiceImpl implements RankingEntryService {
     @Override
     @Transactional
     public RankingEntryResponse addIdolToRank(Long categoryId, RankingEntryRequest request) {
-        CheerleaderRankingCategory category = categoryRepository.findByIdAndIsDeletedFalse(categoryId)
+        CheerleaderRankingCategory category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("Category does not exist or has been deleted"));
 
         Cheerleader idol = cheerleaderRepository.findByIdAndIsDeletedFalse(request.getCheerleaderId())
@@ -91,7 +91,7 @@ public class RankingEntryServiceImpl implements RankingEntryService {
     @Override
     @Transactional(readOnly = true)
     public List<RankingEntryResponse> getEntriesByCategoryId(Long categoryId) {
-        categoryRepository.findByIdAndIsDeletedFalse(categoryId)
+        categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new EntityNotFoundException("Category does not exist or has been deleted"));
 
         return entryRepository.findByRankingCategoryIdAndIsDeletedFalseOrderByRankPositionAsc(categoryId)

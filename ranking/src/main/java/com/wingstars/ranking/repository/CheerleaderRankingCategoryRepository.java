@@ -7,15 +7,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CheerleaderRankingCategoryRepository extends JpaRepository<CheerleaderRankingCategory, Long> {
-    Optional<CheerleaderRankingCategory> findByIdAndIsDeletedFalse(Long id);
 
-    Optional<CheerleaderRankingCategory> findByIdAndStatusTrueAndIsDeletedFalse(Long id);
+    Optional<CheerleaderRankingCategory> findByIdAndStatusTrue(Long id);
 
     Optional<CheerleaderRankingCategory> findByTypeCode(String typeCode);
 
-    boolean existsByTypeCodeAndIsDeletedFalse(String typeCode);
+    boolean existsByTypeCode(String typeCode);
 
-    List<CheerleaderRankingCategory> findByStatusTrueAndIsDeletedFalseOrderByIdDesc();
+    List<CheerleaderRankingCategory> findByStatusTrueOrderByIdDesc();
 
-    List<CheerleaderRankingCategory> findAllByIsDeletedFalseOrderByIdDesc();
+    List<CheerleaderRankingCategory> findAllByOrderByIdDesc();
 }

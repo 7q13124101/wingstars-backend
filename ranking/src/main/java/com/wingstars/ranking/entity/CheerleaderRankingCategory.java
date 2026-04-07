@@ -1,9 +1,11 @@
 package com.wingstars.ranking.entity;
 
-import com.wingstars.core.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
@@ -21,7 +23,11 @@ import lombok.Setter;
 @Builder
 @Entity
 @Table(name = "cheerleader_ranking_categories")
-public class CheerleaderRankingCategory extends BaseEntity {
+public class CheerleaderRankingCategory {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, length = 255)
     private String name;
@@ -32,10 +38,6 @@ public class CheerleaderRankingCategory extends BaseEntity {
     @Builder.Default
     @Column(nullable = false, columnDefinition = "TINYINT(1) DEFAULT 1")
     private Boolean status = true;
-
-    @Builder.Default
-    @Column(name = "is_deleted", nullable = false, columnDefinition = "TINYINT(1) DEFAULT 0")
-    private Boolean isDeleted = false;
 
     @Builder.Default
     @OneToMany(mappedBy = "rankingCategory", cascade = CascadeType.ALL, orphanRemoval = true)

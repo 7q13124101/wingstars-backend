@@ -24,7 +24,7 @@ public class RankingCategoryServiceImpl implements RankingCategoryService {
     @Override
     @Transactional(readOnly = true)
     public List<RankingCategoryResponse> getActiveCategories() {
-        return categoryRepository.findByStatusTrueAndIsDeletedFalseOrderByIdDesc()
+        return categoryRepository.findByStatusTrueOrderByIdDesc()
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -33,7 +33,7 @@ public class RankingCategoryServiceImpl implements RankingCategoryService {
     @Override
     @Transactional(readOnly = true)
     public List<RankingCategoryResponse> getAllCategories() {
-        return categoryRepository.findAllByIsDeletedFalseOrderByIdDesc().stream()
+        return categoryRepository.findAllByOrderByIdDesc().stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -80,16 +80,7 @@ public class RankingCategoryServiceImpl implements RankingCategoryService {
     @Override
     @Transactional
     public void delete(Long id) {
-        softDeleteCategory(id);
-    }
-
-    @Override
-    @Transactional
-    public void softDeleteCategory(Long id) {
-        CheerleaderRankingCategory category = findCategory(id);
-        category.setIsDeleted(true);
-        category.getEntries().forEach(entry -> entry.setIsDeleted(true));
-        categoryRepository.save(category);
+        hardDeleteCategory(id);
     }
 
     @Override
@@ -101,12 +92,12 @@ public class RankingCategoryServiceImpl implements RankingCategoryService {
     }
 
     private CheerleaderRankingCategory findCategory(Long id) {
-        return categoryRepository.findByIdAndIsDeletedFalse(id)
+        return categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ranking category does not exist"));
     }
 
     private CheerleaderRankingCategory findActiveCategory(Long id) {
-        return categoryRepository.findByIdAndStatusTrueAndIsDeletedFalse(id)
+        return categoryRepository.findByIdAndStatusTrue(id)
                 .orElseThrow(() -> new RuntimeException("Active ranking category does not exist"));
     }
 
