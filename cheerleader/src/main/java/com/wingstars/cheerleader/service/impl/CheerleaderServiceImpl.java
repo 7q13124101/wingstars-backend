@@ -1,6 +1,7 @@
 package com.wingstars.cheerleader.service.impl;
 
 import com.wingstars.cheerleader.dto.request.CheerleaderRequest;
+import com.wingstars.cheerleader.dto.response.CheerleaderResponse;
 import com.wingstars.cheerleader.entity.Cheerleader;
 import com.wingstars.cheerleader.repository.CheerleaderRepository;
 import com.wingstars.cheerleader.service.CheerleaderService;
@@ -21,32 +22,34 @@ public class CheerleaderServiceImpl implements CheerleaderService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Cheerleader> getAll(String search, int page, int size) {
+    public Page<CheerleaderResponse> getAll(String search, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
 
         if (StringUtils.hasText(search)) {
-            return cheerleaderRepository.findByFullNameContainingIgnoreCaseAndIsDeletedFalse(search.trim(), pageable);
+            return cheerleaderRepository.findByFullNameContainingIgnoreCaseAndIsDeletedFalse(search.trim(), pageable)
+                    .map(this::toResponse);
         }
 
-        return cheerleaderRepository.findByIsDeletedFalse(pageable);
+        return cheerleaderRepository.findByIsDeletedFalse(pageable)
+                .map(this::toResponse);
     }
 
     @Override
     @Transactional
-    public Cheerleader create(CheerleaderRequest request) {
+    public CheerleaderResponse create(CheerleaderRequest request) {
         Cheerleader cheerleader = modelMapper.map(request, Cheerleader.class);
         cheerleader.setIsDeleted(false);
-        return cheerleaderRepository.save(cheerleader);
+        return toResponse(cheerleaderRepository.save(cheerleader));
     }
 
     @Override
     @Transactional
-    public Cheerleader update(Long id, CheerleaderRequest request) {
+    public CheerleaderResponse update(Long id, CheerleaderRequest request) {
         Cheerleader cheerleader = cheerleaderRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new RuntimeException("Cheerleader does not exist or has been deleted"));
 
         modelMapper.map(request, cheerleader);
-        return cheerleaderRepository.save(cheerleader);
+        return toResponse(cheerleaderRepository.save(cheerleader));
     }
 
     @Override
@@ -57,5 +60,9 @@ public class CheerleaderServiceImpl implements CheerleaderService {
 
         cheerleader.setIsDeleted(true);
         cheerleaderRepository.save(cheerleader);
+    }
+
+    private CheerleaderResponse toResponse(Cheerleader cheerleader) {
+        return modelMapper.map(cheerleader, CheerleaderResponse.class);
     }
 }

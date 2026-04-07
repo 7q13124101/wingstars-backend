@@ -1,7 +1,7 @@
 package com.wingstars.cheerleader.controller;
 
 import com.wingstars.cheerleader.dto.request.CheerleaderRequest;
-import com.wingstars.cheerleader.entity.Cheerleader;
+import com.wingstars.cheerleader.dto.response.CheerleaderResponse;
 import com.wingstars.cheerleader.service.CheerleaderService;
 import com.wingstars.core.payload.ApiResponse;
 import jakarta.validation.Valid;
@@ -27,7 +27,7 @@ public class CheerleaderController {
     private final CheerleaderService cheerleaderService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<Cheerleader>>> getAll(
+    public ResponseEntity<ApiResponse<Page<CheerleaderResponse>>> getAll(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
@@ -37,13 +37,13 @@ public class CheerleaderController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Cheerleader>> create(@Valid @RequestBody CheerleaderRequest request) {
+    public ResponseEntity<ApiResponse<CheerleaderResponse>> create(@Valid @RequestBody CheerleaderRequest request) {
         return ResponseEntity.ok(ApiResponse.success(cheerleaderService.create(request)));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Cheerleader>> update(
+    public ResponseEntity<ApiResponse<CheerleaderResponse>> update(
             @PathVariable Long id,
             @Valid @RequestBody CheerleaderRequest request
     ) {
