@@ -23,10 +23,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     @Bean
     public RoleHierarchy roleHierarchy() {
-        return RoleHierarchyImpl.withDefaultRolePrefix()
-                .role("SUPER_ADMIN").implies("ADMIN")
-                .role("ADMIN").implies("USER")
-                .build();
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        roleHierarchy.setHierarchy("""
+                ROLE_SUPER_ADMIN > ROLE_ADMIN
+                ROLE_ADMIN > ROLE_USER
+                """);
+        return roleHierarchy;
     }
 
     @Bean
