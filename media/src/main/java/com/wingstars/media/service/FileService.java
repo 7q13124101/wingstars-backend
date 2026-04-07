@@ -48,7 +48,8 @@ public class FileService {
         }
 
         String storedName = UUID.randomUUID() + "." + extension;
-        Path uploadPath = Paths.get(uploadDir).toAbsolutePath().normalize();
+        String folderName = resolveFolderName(moduleSource);
+        Path uploadPath = Paths.get(uploadDir, folderName).toAbsolutePath().normalize();
 
         try {
             Files.createDirectories(uploadPath);
@@ -56,7 +57,7 @@ public class FileService {
             Path filePath = uploadPath.resolve(storedName).normalize();
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            String fileUrl = "/uploads/" + storedName;
+            String fileUrl = "/uploads/" + folderName + "/" + storedName;
 
             MediaAsset asset = MediaAsset.builder()
                     .fileUrl(fileUrl)
@@ -71,5 +72,16 @@ public class FileService {
         } catch (IOException ex) {
             throw new RuntimeException("Could not store file. Please try again!", ex);
         }
+    }
+
+    private String resolveFolderName(String moduleSource) {
+        if (!StringUtils.hasText(moduleSource)) {
+            return "common";
+        }
+
+        return moduleSource
+                .trim()
+                .toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9_-]", "_");
     }
 }
