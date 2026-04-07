@@ -12,4 +12,7 @@ public class MediaUploadResponse {
     private String fileUrl;
     private String moduleSource;
     private String title;
+    private String jumpUrl;
+    private Integer displayOrder;
+    private Boolean isActive;
 }

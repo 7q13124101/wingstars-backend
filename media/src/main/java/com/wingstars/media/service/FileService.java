@@ -32,14 +32,22 @@ public class FileService {
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    public MediaUploadResponse uploadFile(MultipartFile file, ModuleSource moduleSource) {
+    public MediaUploadResponse uploadFile(
+            MultipartFile file,
+            ModuleSource moduleSource,
+            String title,
+            String jumpUrl,
+            Integer displayOrder
+    ) {
         StoredFile storedFile = storePhysicalFile(file, moduleSource);
 
         try {
             MediaAsset asset = MediaAsset.builder()
                     .fileUrl(storedFile.fileUrl())
                     .moduleSource(moduleSource)
-                    .title(storedFile.originalFilename())
+                    .title(StringUtils.hasText(title) ? title : storedFile.originalFilename())
+                    .jumpUrl(jumpUrl)
+                    .displayOrder(displayOrder == null ? 0 : displayOrder)
                     .isActive(true)
                     .isDeleted(false)
                     .build();
@@ -81,17 +89,41 @@ public class FileService {
     }
 
     @Transactional
-    public MediaUploadResponse replaceFile(Long id, MultipartFile newFile) {
+    public MediaUploadResponse replaceFile(
+            Long id,
+            MultipartFile newFile,
+            String title,
+            String jumpUrl,
+            Integer displayOrder,
+            Boolean isActive
+    ) {
         MediaAsset asset = mediaAssetRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new RuntimeException("File does not exist"));
 
-        String oldFileUrl = asset.getFileUrl();
-        StoredFile storedFile = storePhysicalFile(newFile, asset.getModuleSource());
+        if (newFile != null && !newFile.isEmpty()) {
+            String oldFileUrl = asset.getFileUrl();
+            StoredFile storedFile = storePhysicalFile(newFile, asset.getModuleSource());
+            deletePhysicalFile(oldFileUrl);
 
-        deletePhysicalFile(oldFileUrl);
+            asset.setFileUrl(storedFile.fileUrl());
+            if (!StringUtils.hasText(title)) {
+                asset.setTitle(storedFile.originalFilename());
+            }
+        }
 
-        asset.setFileUrl(storedFile.fileUrl());
-        asset.setTitle(storedFile.originalFilename());
+        if (StringUtils.hasText(title)) {
+            asset.setTitle(title);
+        }
+        if (jumpUrl != null) {
+            asset.setJumpUrl(jumpUrl);
+        }
+        if (displayOrder != null) {
+            asset.setDisplayOrder(displayOrder);
+        }
+        if (isActive != null) {
+            asset.setIsActive(isActive);
+        }
+
         asset = mediaAssetRepository.save(asset);
 
         return toUploadResponse(asset);
@@ -103,6 +135,9 @@ public class FileService {
                 .fileUrl(asset.getFileUrl())
                 .moduleSource(asset.getModuleSource() == null ? null : asset.getModuleSource().name())
                 .title(asset.getTitle())
+                .jumpUrl(asset.getJumpUrl())
+                .displayOrder(asset.getDisplayOrder())
+                .isActive(asset.getIsActive())
                 .build();
     }
 

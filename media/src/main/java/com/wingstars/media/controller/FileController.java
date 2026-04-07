@@ -33,9 +33,12 @@ public class FileController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<MediaUploadResponse>> uploadFile(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "module_source", required = false) ModuleSource moduleSource
+            @RequestParam(value = "module_source") ModuleSource moduleSource,
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "jump_url", required = false) String jumpUrl,
+            @RequestParam(value = "display_order", defaultValue = "0") Integer displayOrder
     ) {
-        MediaUploadResponse response = fileService.uploadFile(file, moduleSource);
+        MediaUploadResponse response = fileService.uploadFile(file, moduleSource, title, jumpUrl, displayOrder);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
@@ -55,9 +58,13 @@ public class FileController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<MediaUploadResponse>> replaceFile(
             @PathVariable Long id,
-            @RequestParam("file") MultipartFile file
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "jump_url", required = false) String jumpUrl,
+            @RequestParam(value = "display_order", required = false) Integer displayOrder,
+            @RequestParam(value = "is_active", required = false) Boolean isActive
     ) {
-        MediaUploadResponse response = fileService.replaceFile(id, file);
+        MediaUploadResponse response = fileService.replaceFile(id, file, title, jumpUrl, displayOrder, isActive);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
