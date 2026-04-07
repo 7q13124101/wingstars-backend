@@ -73,6 +73,13 @@ public class FileService {
         return assets.map(this::toUploadResponse);
     }
 
+    public MediaUploadResponse getFileById(Long id) {
+        MediaAsset asset = mediaAssetRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new RuntimeException("File does not exist or has already been deleted"));
+
+        return toUploadResponse(asset);
+    }
+
     @Transactional
     public MediaUploadResponse replaceFile(Long id, MultipartFile newFile) {
         MediaAsset asset = mediaAssetRepository.findByIdAndIsDeletedFalse(id)

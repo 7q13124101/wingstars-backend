@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ public class FileController {
     private final FileService fileService;
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<MediaUploadResponse>> uploadFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "module_source", required = false) ModuleSource moduleSource
@@ -38,14 +40,19 @@ public class FileController {
     }
 
     @DeleteMapping("/{id}")
-    // TODO: Add @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteFile(@PathVariable Long id) {
         fileService.softDeleteFile(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<MediaUploadResponse>> getFileById(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(fileService.getFileById(id)));
+    }
+
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    // TODO: Add @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<MediaUploadResponse>> replaceFile(
             @PathVariable Long id,
             @RequestParam("file") MultipartFile file
