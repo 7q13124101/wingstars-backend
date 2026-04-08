@@ -21,4 +21,6 @@ public interface RankingCategoryService {
     void delete(Long id);
 
     void hardDeleteCategory(Long id);
+
+    void softDeleteCategory(Long id);
 }

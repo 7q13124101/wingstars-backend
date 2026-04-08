@@ -91,6 +91,15 @@ public class RankingCategoryServiceImpl implements RankingCategoryService {
         categoryRepository.delete(category);
     }
 
+    @Override
+    @Transactional
+    public void softDeleteCategory(Long id) {
+        CheerleaderRankingCategory category = categoryRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Ranking category does not exist"));
+        category.setStatus(false);
+        categoryRepository.save(category);
+    }
+
     private CheerleaderRankingCategory findCategory(Long id) {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Ranking category does not exist"));
@@ -110,7 +119,7 @@ public class RankingCategoryServiceImpl implements RankingCategoryService {
         categoryRepository.findByTypeCode(normalizedTypeCode)
                 .filter(category -> !category.getId().equals(currentId))
                 .ifPresent(category -> {
-                    throw new BusinessException("Ma phan loai '" + normalizedTypeCode + "' da ton tai trong he thong");
+                    throw new BusinessException("Category code '" + normalizedTypeCode + "' already exists in the system");
                 });
     }
 
