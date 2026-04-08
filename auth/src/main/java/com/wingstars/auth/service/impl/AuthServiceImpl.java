@@ -81,10 +81,10 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new BadCredentialsException("Tài khoản hoặc mật khẩu không chính xác"));
+                .orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new BadCredentialsException("Tài khoản hoặc mật khẩu không chính xác");
+            throw new BadCredentialsException("Invalid username or password");
         }
 
         String accessToken = jwtTokenProvider.generateAccessToken(user);

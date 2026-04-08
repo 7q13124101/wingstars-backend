@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication(scanBasePackages = "com.wingstars")
-@EntityScan(basePackages = "com.wingstars")               // Quét Entity ở các module khác
+@EntityScan(basePackages = "com.wingstars")
 @EnableJpaRepositories(basePackages = "com.wingstars")
 public class WingstarsApplication {
 

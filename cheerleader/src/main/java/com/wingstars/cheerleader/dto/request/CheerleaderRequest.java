@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Setter
 public class CheerleaderRequest {
 
-    @NotBlank(message = "Tên Idol không được để trống")
+    @NotBlank(message = "Full name must not be blank")
     private String fullName;
 
     private String avatarUrl;
@@ -25,13 +25,13 @@ public class CheerleaderRequest {
     private String messageToFans;
     private String hobbies;
 
-    @Positive(message = "Chiều cao phải là số dương")
+    @Positive(message = "Height must be a positive number")
     private Integer heightCm;
 
-    @Positive(message = "Cân nặng phải là số dương")
+    @Positive(message = "Weight must be a positive number")
     private Integer weightKg;
 
-    @Past(message = "Ngày sinh phải ở trong quá khứ")
+    @Past(message = "Birth date must be in the past")
     private LocalDate birthDate;
 
     private String zodiacSign;
