@@ -12,6 +12,7 @@ import com.wingstars.auth.repository.UserRepository;
 import com.wingstars.auth.service.AuthService;
 import com.wingstars.core.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,10 +81,10 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Invalid username or password"));
+                .orElseThrow(() -> new BadCredentialsException("Tài khoản hoặc mật khẩu không chính xác"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid username or password");
+            throw new BadCredentialsException("Tài khoản hoặc mật khẩu không chính xác");
         }
 
         String accessToken = jwtTokenProvider.generateAccessToken(user);
