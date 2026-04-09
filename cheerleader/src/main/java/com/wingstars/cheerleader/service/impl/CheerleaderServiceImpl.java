@@ -88,6 +88,25 @@ public class CheerleaderServiceImpl implements CheerleaderService {
     }
 
     private CheerleaderResponse toResponse(Cheerleader cheerleader) {
-        return modelMapper.map(cheerleader, CheerleaderResponse.class);
+        return CheerleaderResponse.builder()
+                .id(cheerleader.getId())
+                .fullName(cheerleader.getFullName())
+                .jerseyNumber(cheerleader.getJerseyNumber())
+                .aboutCheerleader(cheerleader.getAboutCheerleader())
+                .messageToFans(cheerleader.getMessageToFans())
+                .avatarUrl(cheerleader.getAvatarUrl())
+                .social(CheerleaderResponse.SocialInfo.builder()
+                        .facebook(cheerleader.getFacebookUrl())
+                        .instagram(cheerleader.getInstagramUrl())
+                        .build())
+                .profile(CheerleaderResponse.ProfileInfo.builder()
+                        .birthDate(cheerleader.getBirthDate())
+                        .zodiacSign(cheerleader.getZodiacSign())
+                        .bloodType(cheerleader.getBloodType())
+                        .height(cheerleader.getHeightCm() != null ? cheerleader.getHeightCm().toString() : null)
+                        .weight(cheerleader.getWeightKg() != null ? cheerleader.getWeightKg().toString() : null)
+                        .hobbies(cheerleader.getHobbies())
+                        .build())
+                .build();
     }
 }
