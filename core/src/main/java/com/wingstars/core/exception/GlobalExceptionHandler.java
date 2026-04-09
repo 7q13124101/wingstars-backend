@@ -47,6 +47,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(401).body(res);
     }
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Object>> handleAccessDenied(org.springframework.security.access.AccessDeniedException ex) {
+        ApiResponse<Object> res = ApiResponse.builder()
+                .status(403)
+                .message("Access Denied: You do not have permission to access this resource.")
+                .timestamp(LocalDateTime.now())
+                .build();
+        return ResponseEntity.status(403).body(res);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<Object>> handleRuntime(RuntimeException ex) {
         ApiResponse<Object> res = ApiResponse.builder()
