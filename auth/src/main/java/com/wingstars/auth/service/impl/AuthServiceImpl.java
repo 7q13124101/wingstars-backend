@@ -19,7 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.UUID;
+import java.security.SecureRandom;
+import java.util.Base64;
+import java.security.MessageDigest;
+import java.nio.charset.StandardCharsets;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -88,11 +91,12 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String accessToken = jwtTokenProvider.generateAccessToken(user);
-        String refreshTokenValue = UUID.randomUUID().toString();
+        String plainRefreshToken = generateRefreshToken();
+        String hashedRefreshToken = hashToken(plainRefreshToken);
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .user(user)
-                .token(refreshTokenValue)
+                .token(hashedRefreshToken)
                 .expiryDate(LocalDateTime.now().plus(refreshTokenExpirationMs, ChronoUnit.MILLIS))
                 .revoked(false)
                 .build();
@@ -100,7 +104,7 @@ public class AuthServiceImpl implements AuthService {
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshTokenValue)
+                .refreshToken(plainRefreshToken)
                 .tokenType("Bearer")
                 .build();
     }
@@ -108,7 +112,8 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponse refreshToken(String refreshToken) {
-        RefreshToken storedToken = refreshTokenRepository.findByToken(refreshToken)
+        String hashedIncomingToken = hashToken(refreshToken);
+        RefreshToken storedToken = refreshTokenRepository.findByToken(hashedIncomingToken)
                 .orElseThrow(() -> new RuntimeException("Refresh token is invalid"));
 
         if (Boolean.TRUE.equals(storedToken.getRevoked())) {
@@ -120,13 +125,44 @@ public class AuthServiceImpl implements AuthService {
             refreshTokenRepository.save(storedToken);
             throw new RuntimeException("Refresh token has expired");
         }
+        
+        // Rotate token
+        storedToken.setRevoked(true);
+        refreshTokenRepository.save(storedToken);
 
         String accessToken = jwtTokenProvider.generateAccessToken(storedToken.getUser());
+        String newPlainRefreshToken = generateRefreshToken();
+        String newHashedRefreshToken = hashToken(newPlainRefreshToken);
+
+        RefreshToken newRefreshToken = RefreshToken.builder()
+                .user(storedToken.getUser())
+                .token(newHashedRefreshToken)
+                .expiryDate(LocalDateTime.now().plus(refreshTokenExpirationMs, ChronoUnit.MILLIS))
+                .revoked(false)
+                .build();
+        refreshTokenRepository.save(newRefreshToken);
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(storedToken.getToken())
+                .refreshToken(newPlainRefreshToken)
                 .tokenType("Bearer")
                 .build();
+    }
+
+    private String generateRefreshToken() {
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[64];
+        random.nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+
+    private String hashToken(String token) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(token.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to hash token", e);
+        }
     }
 }
