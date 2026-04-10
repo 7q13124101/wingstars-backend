@@ -29,7 +29,7 @@ public class FileService {
 
     private final MediaAssetRepository mediaAssetRepository;
 
-    @Value("${file.upload-dir}")
+    @Value("${file.upload-dir:upload/}")
     private String uploadDir;
 
     public MediaUploadResponse uploadFile(
