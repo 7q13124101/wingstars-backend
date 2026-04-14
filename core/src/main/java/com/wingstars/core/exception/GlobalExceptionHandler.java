@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(500).body(res);
     }
 
-    // Bat loi Validation (@Valid)
+    // Catch Validation errors (@Valid)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();

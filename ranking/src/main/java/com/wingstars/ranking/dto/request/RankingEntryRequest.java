@@ -16,9 +16,9 @@ public class RankingEntryRequest {
     @Min(1)
     private Integer rankPosition;
 
-    @Min(value = 0, message = "Diem so khong duoc nho hon 0")
+    @Min(value = 0, message = "Score must not be less than 0")
     private Integer score = 0;
 
-    @Size(max = 500, message = "URL anh xep hang khong duoc vuot qua 500 ky tu")
+    @Size(max = 500, message = "Ranking image URL must not exceed 500 characters")
     private String cheerleaderImageUrl;
 }

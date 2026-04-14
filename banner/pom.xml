@@ -68,7 +68,7 @@
                         <path>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
-                            <!-- Spring Boot parent quản lý biến lombok.version này -->
+                            <!-- This lombok.version is managed by Spring Boot parent -->
                             <version>${lombok.version}</version>
                         </path>
                         <path>

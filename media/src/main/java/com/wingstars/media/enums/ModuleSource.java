@@ -1,14 +1,17 @@
 package com.wingstars.media.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum ModuleSource {
-    CHEERLEADER_AVATAR("Anh dai dien cua Idol"),
-    CHEERLEADER_AUDIO("File am thanh doc quyen cua Idol"),
-    CHEERLEADER_GALLERY("Anh trong bo suu tap cua Idol"),
-    BANNER_HOME("Banner hien thi tren trang chu"),
-    BANNER_PROMO("Banner cho cac chuong trinh khuyen mai"),
-    USER_AVATAR("Anh dai dien cua nguoi dung hoac Admin"),
-    SYSTEM_ASSET("Cac file tai nguyen chung cua he thong"),
-    UNKNOWN("Khong xac dinh");
+    CHEERLEADER_AVATAR("Cheerleader profile avatar"),
+    CHEERLEADER_AUDIO("Exclusive audio file of cheerleader"),
+    CHEERLEADER_GALLERY("Images in cheerleader gallery"),
+    BANNER_HOME("Banner displayed on home page"),
+    BANNER_PROMO("Banner for promotional programs"),
+    USER_AVATAR("Avatar of User or Admin"),
+    SYSTEM_ASSET("General system resource files"),
+    UNKNOWN("Unknown source");
 
     private final String description;
 
@@ -16,7 +19,4 @@ public enum ModuleSource {
         this.description = description;
     }
 
-    public String getDescription() {
-        return description;
-    }
 }

@@ -39,8 +39,6 @@ public class CheerleaderResponse {
 
     private String avatarUrl;
 
-    // --- CÁC CLASS LỒNG NHAU (NESTED CLASSES) ---
-
     @Getter
     @Setter
     @NoArgsConstructor
