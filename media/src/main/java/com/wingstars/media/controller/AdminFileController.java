@@ -5,6 +5,7 @@ import com.wingstars.core.payload.PageResponse;
 import com.wingstars.media.dto.MediaUploadResponse;
 import com.wingstars.media.enums.ModuleSource;
 import com.wingstars.media.service.FileService;
+import com.wingstars.media.service.MediaMaintenanceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,6 +19,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/admin/files")
 @RequiredArgsConstructor
@@ -25,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class AdminFileController {
 
     private final FileService fileService;
+    private final MediaMaintenanceService mediaMaintenanceService;
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
@@ -89,5 +94,26 @@ public class AdminFileController {
 
         PageResponse<MediaUploadResponse> result = fileService.getFiles(moduleSource, pageable);
         return ResponseEntity.ok(ApiResponse.success(result));
+    }
+
+    @PostMapping("/update-host")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    @Operation(summary = "Update media host IP", description = "Prefix all relative media file URLs with the specified host IP. (Super Admin only)")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> updateMediaHost(
+            @Parameter(description = "Must be 1 to execute the update")
+            @RequestParam int execute,
+            @Parameter(description = "Host URL (e.g., http://10.67.68.111)")
+            @RequestParam String host) {
+        
+        int updatedCount = mediaMaintenanceService.updateFileUrlsWithHost(host, execute);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("updatedCount", updatedCount);
+        result.put("execute", execute);
+        result.put("host", host);
+        
+        String message = execute == 1 ? "Media hosts updated successfully" : "Execution skipped (execute parameter not 1)";
+        
+        return ResponseEntity.ok(ApiResponse.success(result, message));
     }
 }
