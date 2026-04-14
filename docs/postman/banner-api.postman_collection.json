@@ -1,0 +1,318 @@
+{
+  "info": {
+    "_postman_id": "e0b0f8ef-4df1-4d58-9a2a-9c2b65d0b001",
+    "name": "Wingstars Banner API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "bannerId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Create Banner",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Home hero banner\",\n  \"positionCode\": \"HOME_TOP\",\n  \"status\": 1,\n  \"images\": [\n    {\n      \"imageUrl\": \"https://cdn.example.com/banners/home-top-1.jpg\",\n      \"linkUrl\": \"https://wingstars.com/events/summer\",\n      \"displayOrder\": 1,\n      \"durationMs\": 2000,\n      \"status\": 1,\n      \"startTime\": null,\n      \"endTime\": null\n    },\n    {\n      \"imageUrl\": \"https://cdn.example.com/banners/home-top-2.jpg\",\n      \"linkUrl\": null,\n      \"displayOrder\": 2,\n      \"durationMs\": 3000,\n      \"status\": 0,\n      \"startTime\": null,\n      \"endTime\": null\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/banners",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "banners"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Banner",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated home hero banner\",\n  \"positionCode\": \"SIDEBAR\",\n  \"status\": 1,\n  \"images\": [\n    {\n      \"imageUrl\": \"https://cdn.example.com/banners/sidebar-1.jpg\",\n      \"linkUrl\": \"https://wingstars.com/news/launch\",\n      \"displayOrder\": 1,\n      \"durationMs\": 2500,\n      \"status\": 1,\n      \"startTime\": \"2026-04-13T00:00:00\",\n      \"endTime\": \"2026-04-30T23:59:59\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/banners/{{bannerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "banners",
+                "{{bannerId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Banner Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": 0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/banners/{{bannerId}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "banners",
+                "{{bannerId}}",
+                "status"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Restore Banner",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/banners/{{bannerId}}/restore",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "banners",
+                "{{bannerId}}",
+                "restore"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Soft Delete Banner",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/banners/{{bannerId}}/soft",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "banners",
+                "{{bannerId}}",
+                "soft"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Hard Delete Banner",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/banners/{{bannerId}}/hard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "banners",
+                "{{bannerId}}",
+                "hard"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Banner Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/banners/{{bannerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "banners",
+                "{{bannerId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Active Banner List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/banners?page=0&pageSize=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "banners"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Trash List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/banners/trash?page=0&pageSize=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "banners",
+                "trash"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "Get Public Banners By Position",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/public/banners?positionCode=HOME_TOP",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "public",
+                "banners"
+              ],
+              "query": [
+                {
+                "key": "positionCode",
+                "value": "HOME_TOP"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
