@@ -10,6 +10,8 @@ import com.wingstars.banner.entity.BannerPosition;
 import com.wingstars.banner.repository.BannerRepository;
 import com.wingstars.banner.service.BannerService;
 import com.wingstars.core.exception.BusinessException;
+import com.wingstars.core.mapper.PageMapper;
+import com.wingstars.core.payload.PageResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -126,16 +128,18 @@ public class BannerServiceImpl implements BannerService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<BannerResponse> getAdminBanners(int page, int pageSize) {
+    public PageResponse<BannerResponse> getAdminBanners(int page, int pageSize) {
         Pageable pageable = buildPageable(page, pageSize);
-        return bannerRepository.findByIsDeletedFalse(pageable).map(this::toResponse);
+        Page<BannerResponse> springPage = bannerRepository.findByIsDeletedFalse(pageable).map(this::toResponse);
+        return PageMapper.toPageResponse(springPage);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<BannerResponse> getTrash(int page, int pageSize) {
+    public PageResponse<BannerResponse> getTrash(int page, int pageSize) {
         Pageable pageable = buildPageable(page, pageSize);
-        return bannerRepository.findByIsDeletedTrue(pageable).map(this::toResponse);
+        Page<BannerResponse> springPage = bannerRepository.findByIsDeletedTrue(pageable).map(this::toResponse);
+        return PageMapper.toPageResponse(springPage);
     }
 
     private Banner getExistingBanner(Long id) {

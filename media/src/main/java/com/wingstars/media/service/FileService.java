@@ -4,6 +4,8 @@ import com.wingstars.media.dto.MediaUploadResponse;
 import com.wingstars.media.entity.MediaAsset;
 import com.wingstars.media.enums.ModuleSource;
 import com.wingstars.media.repository.MediaAssetRepository;
+import com.wingstars.core.mapper.PageMapper;
+import com.wingstars.core.payload.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -69,7 +71,7 @@ public class FileService {
         mediaAssetRepository.save(asset);
     }
 
-    public Page<MediaUploadResponse> getFiles(ModuleSource moduleSource, Pageable pageable) {
+    public PageResponse<MediaUploadResponse> getFiles(ModuleSource moduleSource, Pageable pageable) {
         Page<MediaAsset> assets;
 
         if (moduleSource != null) {
@@ -78,7 +80,8 @@ public class FileService {
             assets = mediaAssetRepository.findAllByIsDeletedFalse(pageable);
         }
 
-        return assets.map(this::toUploadResponse);
+        Page<MediaUploadResponse> springPage = assets.map(this::toUploadResponse);
+        return PageMapper.toPageResponse(springPage);
     }
 
     public MediaUploadResponse getFileById(Long id) {

@@ -4,11 +4,11 @@ import com.wingstars.banner.dto.request.BannerRequest;
 import com.wingstars.banner.dto.response.BannerResponse;
 import com.wingstars.banner.service.BannerService;
 import com.wingstars.core.payload.ApiResponse;
+import com.wingstars.core.payload.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -70,7 +70,7 @@ public class AdminBannerController {
 
     @GetMapping
     @Operation(summary = "Get list for admin", description = "Get paginated banner list excluding trashed banners.")
-    public ResponseEntity<ApiResponse<Page<BannerResponse>>> getAll(
+    public ResponseEntity<ApiResponse<PageResponse<BannerResponse>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int pageSize) {
         return ResponseEntity.ok(ApiResponse.success(bannerService.getAdminBanners(page, pageSize)));
@@ -78,7 +78,7 @@ public class AdminBannerController {
 
     @GetMapping("/trash")
     @Operation(summary = "Get trash list", description = "Get paginated banner list from trash.")
-    public ResponseEntity<ApiResponse<Page<BannerResponse>>> getTrash(
+    public ResponseEntity<ApiResponse<PageResponse<BannerResponse>>> getTrash(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int pageSize) {
         return ResponseEntity.ok(ApiResponse.success(bannerService.getTrash(page, pageSize)));

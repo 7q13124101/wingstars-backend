@@ -3,7 +3,7 @@ package com.wingstars.banner.service;
 import com.wingstars.banner.dto.request.BannerRequest;
 import com.wingstars.banner.dto.response.BannerResponse;
 import com.wingstars.banner.entity.BannerPosition;
-import org.springframework.data.domain.Page;
+import com.wingstars.core.payload.PageResponse;
 
 public interface BannerService {
     BannerResponse create(BannerRequest request);
@@ -20,9 +20,9 @@ public interface BannerService {
 
     BannerResponse getAdminById(Long id);
 
-    Page<BannerResponse> getAdminBanners(int page, int pageSize);
+    PageResponse<BannerResponse> getAdminBanners(int page, int pageSize);
 
-    Page<BannerResponse> getTrash(int page, int pageSize);
+    PageResponse<BannerResponse> getTrash(int page, int pageSize);
 
     BannerResponse getPublicBanner(BannerPosition positionCode);
 }

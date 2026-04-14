@@ -2,10 +2,10 @@ package com.wingstars.cheerleader.service;
 
 import com.wingstars.cheerleader.dto.request.CheerleaderRequest;
 import com.wingstars.cheerleader.dto.response.CheerleaderResponse;
-import org.springframework.data.domain.Page;
+import com.wingstars.core.payload.PageResponse;
 
 public interface CheerleaderService {
-    Page<CheerleaderResponse> getAll(String search, int page, int size);
+    PageResponse<CheerleaderResponse> getAll(String search, int page, int size);
 
     CheerleaderResponse getById(Long id);
 

@@ -1,11 +1,11 @@
 package com.wingstars.media.controller;
 
 import com.wingstars.core.payload.ApiResponse;
+import com.wingstars.core.payload.PageResponse;
 import com.wingstars.media.dto.MediaUploadResponse;
 import com.wingstars.media.enums.ModuleSource;
 import com.wingstars.media.service.FileService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -69,7 +69,7 @@ public class FileController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<MediaUploadResponse>>> getFiles(
+    public ResponseEntity<ApiResponse<PageResponse<MediaUploadResponse>>> getFiles(
             @RequestParam(required = false) ModuleSource moduleSource,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -84,7 +84,7 @@ public class FileController {
                 Sort.by(Sort.Direction.fromString(sortDirection), sortField)
         );
 
-        Page<MediaUploadResponse> result = fileService.getFiles(moduleSource, pageable);
+        PageResponse<MediaUploadResponse> result = fileService.getFiles(moduleSource, pageable);
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 }

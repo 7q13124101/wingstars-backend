@@ -5,6 +5,8 @@ import com.wingstars.cheerleader.dto.response.CheerleaderResponse;
 import com.wingstars.cheerleader.entity.Cheerleader;
 import com.wingstars.cheerleader.repository.CheerleaderRepository;
 import com.wingstars.cheerleader.service.CheerleaderService;
+import com.wingstars.core.mapper.PageMapper;
+import com.wingstars.core.payload.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -22,16 +24,19 @@ public class CheerleaderServiceImpl implements CheerleaderService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<CheerleaderResponse> getAll(String search, int page, int size) {
+    public PageResponse<CheerleaderResponse> getAll(String search, int page, int size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
+        Page<CheerleaderResponse> springPage;
 
         if (StringUtils.hasText(search)) {
-            return cheerleaderRepository.findByFullNameContainingIgnoreCaseAndIsDeletedFalse(search.trim(), pageable)
+            springPage = cheerleaderRepository.findByFullNameContainingIgnoreCaseAndIsDeletedFalse(search.trim(), pageable)
+                    .map(this::toResponse);
+        } else {
+            springPage = cheerleaderRepository.findByIsDeletedFalse(pageable)
                     .map(this::toResponse);
         }
 
-        return cheerleaderRepository.findByIsDeletedFalse(pageable)
-                .map(this::toResponse);
+        return PageMapper.toPageResponse(springPage);
     }
 
     @Override

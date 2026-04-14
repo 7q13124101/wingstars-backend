@@ -4,9 +4,9 @@ import com.wingstars.cheerleader.dto.request.CheerleaderRequest;
 import com.wingstars.cheerleader.dto.response.CheerleaderResponse;
 import com.wingstars.cheerleader.service.CheerleaderService;
 import com.wingstars.core.payload.ApiResponse;
+import com.wingstars.core.payload.PageResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,7 +27,7 @@ public class CheerleaderController {
     private final CheerleaderService cheerleaderService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<CheerleaderResponse>>> getAll(
+    public ResponseEntity<ApiResponse<PageResponse<CheerleaderResponse>>> getAll(
             @RequestParam(required = false) String search,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
