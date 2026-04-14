@@ -5,6 +5,9 @@ import com.wingstars.auth.dto.request.AccountUpdateRequest;
 import com.wingstars.auth.dto.response.UserResponse;
 import com.wingstars.auth.service.AccountAdminService;
 import com.wingstars.core.payload.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,16 +24,19 @@ import java.time.LocalDateTime;
 @RequestMapping("/api/admin/accounts")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('SUPER_ADMIN')")
+@Tag(name = "Admin Account Management", description = "Management APIs for user accounts (Super Admin only)")
 public class AccountAdminController {
 
     private final AccountAdminService accountAdminService;
 
     @GetMapping
+    @Operation(summary = "Get all accounts", description = "Retrieve a paginated list of all user accounts.")
     public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllAccounts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "desc") String direction,
+            @Parameter(description = "Include locked/soft-deleted accounts")
             @RequestParam(defaultValue = "true") Boolean includeDeleted) {
         
         Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
@@ -49,6 +55,7 @@ public class AccountAdminController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get account detail", description = "Retrieve full information of a specific user account by ID.")
     public ResponseEntity<ApiResponse<UserResponse>> getAccountById(@PathVariable Long id) {
         UserResponse data = accountAdminService.getAccountById(id);
         
@@ -63,6 +70,7 @@ public class AccountAdminController {
     }
 
     @PostMapping
+    @Operation(summary = "Create internal account", description = "Create a new internal account with specific role (ADMIN, SUPER_ADMIN, etc.)")
     public ResponseEntity<ApiResponse<UserResponse>> createAccount(@RequestBody @Valid AccountCreateRequest request) {
         UserResponse data = accountAdminService.createAccount(request);
         
@@ -77,6 +85,7 @@ public class AccountAdminController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update account", description = "Update existing user information and role.")
     public ResponseEntity<ApiResponse<UserResponse>> updateAccount(@PathVariable Long id, @RequestBody @Valid AccountUpdateRequest request) {
         UserResponse data = accountAdminService.updateAccount(id, request);
         
@@ -91,6 +100,7 @@ public class AccountAdminController {
     }
 
     @DeleteMapping("/{id}/lock")
+    @Operation(summary = "Lock account", description = "Soft delete/lock a user account and revoke all their refresh tokens.")
     public ResponseEntity<ApiResponse<Void>> lockAccount(@PathVariable Long id) {
         accountAdminService.lockAccount(id);
         
@@ -105,6 +115,7 @@ public class AccountAdminController {
     }
 
     @PostMapping("/{id}/unlock")
+    @Operation(summary = "Unlock account", description = "Restore a locked user account.")
     public ResponseEntity<ApiResponse<Void>> unlockAccount(@PathVariable Long id) {
         accountAdminService.unlockAccount(id);
         
