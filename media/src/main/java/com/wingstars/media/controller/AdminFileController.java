@@ -5,6 +5,9 @@ import com.wingstars.core.payload.PageResponse;
 import com.wingstars.media.dto.MediaUploadResponse;
 import com.wingstars.media.enums.ModuleSource;
 import com.wingstars.media.service.FileService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,25 +15,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/files")
+@RequestMapping("/api/admin/files")
 @RequiredArgsConstructor
-public class FileController {
+@Tag(name = "Admin File", description = "File management APIs for Admin")
+public class AdminFileController {
 
     private final FileService fileService;
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Upload file", description = "Upload a new file with module source and optional details.")
     public ResponseEntity<ApiResponse<MediaUploadResponse>> uploadFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "module_source") ModuleSource moduleSource,
@@ -44,18 +42,21 @@ public class FileController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete file", description = "Soft delete a file by ID.")
     public ResponseEntity<ApiResponse<Void>> deleteFile(@PathVariable Long id) {
         fileService.softDeleteFile(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get file detail", description = "Get full file information by ID.")
     public ResponseEntity<ApiResponse<MediaUploadResponse>> getFileById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(fileService.getFileById(id)));
     }
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Replace/Update file", description = "Update file details or replace the physical file.")
     public ResponseEntity<ApiResponse<MediaUploadResponse>> replaceFile(
             @PathVariable Long id,
             @RequestParam(value = "file", required = false) MultipartFile file,
@@ -69,10 +70,12 @@ public class FileController {
     }
 
     @GetMapping
+    @Operation(summary = "List files", description = "Get a paginated list of all non-deleted files.")
     public ResponseEntity<ApiResponse<PageResponse<MediaUploadResponse>>> getFiles(
             @RequestParam(required = false) ModuleSource moduleSource,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sort format: field,direction (e.g., id,desc)")
             @RequestParam(defaultValue = "id,desc") String[] sort
     ) {
         String sortField = sort.length > 0 ? sort[0] : "id";
