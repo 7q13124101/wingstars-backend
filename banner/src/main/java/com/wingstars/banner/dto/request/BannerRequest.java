@@ -16,15 +16,13 @@ import java.util.List;
 public class BannerRequest {
     private String title;
 
-    private String linkUrl;
-
     @Schema(description = "Banner position code", allowableValues = { "HOME_TOP", "EVENT_POPUP",
             "SIDEBAR" }, example = "HOME_TOP")
     private BannerPosition positionCode;
 
-    @Min(value = 0, message = "Status must be 0 or 1")
-    @Max(value = 1, message = "Status must be 0 or 1")
+    private Integer durationMs;
     private Integer status;
+    private Short displayOrder;
 
     @NotEmpty(message = "Banner must contain at least one image")
     @Valid

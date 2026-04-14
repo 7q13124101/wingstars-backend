@@ -19,9 +19,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -38,10 +40,10 @@ public class BannerServiceImpl implements BannerService {
     public BannerResponse create(BannerRequest request) {
         Banner banner = new Banner();
         banner.setTitle(trimToNull(request.getTitle()));
-        banner.setLinkUrl(trimToNull(request.getLinkUrl()));
         banner.setPositionCode(defaultPositionCode(request.getPositionCode()));
         banner.setStatus(defaultCreateStatus(request.getStatus()));
         banner.setIsDeleted(false);
+        banner.setDurationMs(defaultDuration(request.getDurationMs()));
         replaceImages(banner, request.getImages());
         if (banner.getStatus() == ACTIVE_STATUS) {
             deactivateOtherActiveBanners(banner.getPositionCode(), null);
@@ -58,25 +60,14 @@ public class BannerServiceImpl implements BannerService {
         int newStatus = resolveUpdatedStatus(request.getStatus(), banner.getStatus());
 
         banner.setTitle(trimToNull(request.getTitle()));
-        banner.setLinkUrl(trimToNull(request.getLinkUrl()));
         banner.setPositionCode(newPositionCode);
         banner.setStatus(newStatus);
+        banner.setDurationMs(defaultDuration(request.getDurationMs()));
         replaceImages(banner, request.getImages());
         if (newStatus == ACTIVE_STATUS) {
             deactivateOtherActiveBanners(newPositionCode, banner.getId());
         }
 
-        return toResponse(bannerRepository.save(banner));
-    }
-
-    @Override
-    @Transactional
-    public BannerResponse updateStatus(Long id, Integer status) {
-        Banner banner = getExistingBanner(id);
-        banner.setStatus(status);
-        if (status != null && status == ACTIVE_STATUS) {
-            deactivateOtherActiveBanners(banner.getPositionCode(), banner.getId());
-        }
         return toResponse(bannerRepository.save(banner));
     }
 
@@ -91,8 +82,19 @@ public class BannerServiceImpl implements BannerService {
         }
 
         banner.setIsDeleted(false);
-        banner.getImages().forEach(image -> image.setIsDeleted(false));
         if (banner.getStatus() != null && banner.getStatus() == ACTIVE_STATUS) {
+            deactivateOtherActiveBanners(banner.getPositionCode(), banner.getId());
+        }
+        return toResponse(bannerRepository.save(banner));
+    }
+
+    @Override
+    @Transactional
+    public BannerResponse updateStatus(Long id, Integer status) {
+        Banner banner = getExistingBanner(id);
+        int newStatus = status != null ? status : (banner.getStatus() != null ? banner.getStatus() : INACTIVE_STATUS);
+        banner.setStatus(newStatus);
+        if (newStatus == ACTIVE_STATUS) {
             deactivateOtherActiveBanners(banner.getPositionCode(), banner.getId());
         }
         return toResponse(bannerRepository.save(banner));
@@ -103,7 +105,6 @@ public class BannerServiceImpl implements BannerService {
     public void softDelete(Long id) {
         Banner banner = getExistingBanner(id);
         banner.setIsDeleted(true);
-        banner.getImages().forEach(image -> image.setIsDeleted(true));
         bannerRepository.save(banner);
     }
 
@@ -137,16 +138,6 @@ public class BannerServiceImpl implements BannerService {
         return bannerRepository.findByIsDeletedTrue(pageable).map(this::toResponse);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public BannerResponse getPublicBanner(BannerPosition positionCode) {
-        List<Banner> banners = bannerRepository.findActiveBannersByPosition(positionCode);
-        if (banners.isEmpty()) {
-            return null;
-        }
-        return toResponse(banners.get(0));
-    }
-
     private Banner getExistingBanner(Long id) {
         Banner banner = bannerRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Banner not found"));
@@ -158,27 +149,29 @@ public class BannerServiceImpl implements BannerService {
         return banner;
     }
 
+    private BannerPosition defaultPositionCode(BannerPosition positionCode) {
+        return positionCode == null ? DEFAULT_POSITION_CODE : positionCode;
+    }
+
     private int defaultCreateStatus(Integer status) {
         return status == null ? INACTIVE_STATUS : status;
     }
 
     private int resolveUpdatedStatus(Integer requestedStatus, Integer currentStatus) {
-        return requestedStatus == null ? (currentStatus == null ? INACTIVE_STATUS : currentStatus) : requestedStatus;
-    }
-
-    private BannerPosition defaultPositionCode(BannerPosition positionCode) {
-        return positionCode == null ? DEFAULT_POSITION_CODE : positionCode;
-    }
-
-    private void deactivateOtherActiveBanners(BannerPosition positionCode, Long excludedBannerId) {
-        List<Banner> activeBanners = bannerRepository.findByPositionAndStatusAndIsDeletedFalse(positionCode, ACTIVE_STATUS);
-        for (Banner activeBanner : activeBanners) {
-            if (excludedBannerId != null && excludedBannerId.equals(activeBanner.getId())) {
-                continue;
-            }
-            activeBanner.setStatus(INACTIVE_STATUS);
+        if (requestedStatus != null) {
+            return requestedStatus;
         }
-        bannerRepository.saveAll(activeBanners);
+        return currentStatus != null ? currentStatus : INACTIVE_STATUS;
+    }
+
+    private void deactivateOtherActiveBanners(BannerPosition position, Long excludeId) {
+        List<Banner> activeBanners = bannerRepository.findByPositionAndStatusAndIsDeletedFalse(position, ACTIVE_STATUS);
+        for (Banner b : activeBanners) {
+            if (excludeId == null || !excludeId.equals(b.getId())) {
+                b.setStatus(INACTIVE_STATUS);
+                bannerRepository.save(b);
+            }
+        }
     }
 
     private String trimToNull(String value) {
@@ -204,11 +197,11 @@ public class BannerServiceImpl implements BannerService {
         for (BannerImageRequest request : normalizedRequests) {
             BannerImage image = new BannerImage();
             image.setImageUrl(request.getImageUrl().trim());
+            image.setLinkUrl(trimToNull(request.getLinkUrl()));
             image.setDisplayOrder(request.getDisplayOrder());
-            image.setDurationMs(defaultDuration(request.getDurationMs()));
             image.setStartTime(request.getStartTime());
             image.setEndTime(request.getEndTime());
-            image.setIsDeleted(false);
+            image.setIsDeleted(toDeletedFlag(request.getStatus()));
             if (image.getStartTime() != null && image.getEndTime() != null
                     && image.getEndTime().isBefore(image.getStartTime())) {
                 throw new BusinessException("Image end time must be after start time");
@@ -219,9 +212,23 @@ public class BannerServiceImpl implements BannerService {
 
     private List<BannerImageRequest> normalizeImageRequests(List<BannerImageRequest> requests) {
         List<BannerImageRequest> normalized = new ArrayList<>(requests);
+        boolean hasMissingDisplayOrder = normalized.stream().anyMatch(request -> request.getDisplayOrder() == null);
 
-        for (int index = 0; index < normalized.size(); index++) {
-            normalized.get(index).setDisplayOrder(index);
+        if (hasMissingDisplayOrder) {
+            for (int index = 0; index < normalized.size(); index++) {
+                if (normalized.get(index).getDisplayOrder() == null) {
+                    normalized.get(index).setDisplayOrder(index);
+                }
+            }
+        }
+
+        long distinctDisplayOrderCount = normalized.stream()
+                .map(BannerImageRequest::getDisplayOrder)
+                .filter(Objects::nonNull)
+                .distinct()
+                .count();
+        if (distinctDisplayOrderCount != normalized.size()) {
+            throw new BusinessException("Image display order must be unique inside banner");
         }
         return normalized;
     }
@@ -234,12 +241,13 @@ public class BannerServiceImpl implements BannerService {
         BannerResponse response = new BannerResponse();
         response.setId(banner.getId());
         response.setTitle(banner.getTitle());
-        response.setLinkUrl(banner.getLinkUrl());
         response.setPositionCode(banner.getPositionCode());
         response.setStatus(banner.getStatus());
+        response.setDurationMs(banner.getDurationMs());
+        response.setDisplayOrder(banner.getDisplayOrder());
         response.setDeleted(Boolean.TRUE.equals(banner.getIsDeleted()));
         response.setImages(banner.getImages().stream()
-                .sorted(Comparator.comparing(BannerImage::getDisplayOrder))
+                .sorted(Comparator.comparing(BannerImage::getDisplayOrder, Comparator.nullsLast(Integer::compareTo)))
                 .map(this::toImageResponse)
                 .toList());
         response.setCreatedAt(banner.getCreatedAt());
@@ -251,13 +259,46 @@ public class BannerServiceImpl implements BannerService {
         BannerImageResponse response = new BannerImageResponse();
         response.setId(image.getId());
         response.setImageUrl(image.getImageUrl());
+        response.setLinkUrl(image.getLinkUrl());
         response.setDisplayOrder(image.getDisplayOrder());
-        response.setDurationMs(image.getDurationMs());
         response.setStartTime(image.getStartTime());
         response.setEndTime(image.getEndTime());
+        response.setStatus(toStatus(image.getIsDeleted()));
         response.setDeleted(Boolean.TRUE.equals(image.getIsDeleted()));
         response.setCreatedAt(image.getCreatedAt());
         response.setUpdatedAt(image.getUpdatedAt());
         return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BannerResponse getPublicBanner(BannerPosition positionCode) {
+        List<Banner> banners = bannerRepository.findActiveBannersByPosition(positionCode);
+        if (banners.isEmpty()) {
+            return null;
+        }
+
+        BannerResponse response = toResponse(banners.get(0));
+        response.setImages(response.getImages().stream()
+                .filter(this::isPublicImageVisible)
+                .sorted(Comparator.comparing(BannerImageResponse::getDisplayOrder, Comparator.nullsLast(Integer::compareTo)))
+                .toList());
+        return response.getImages().isEmpty() ? null : response;
+    }
+
+    private boolean isPublicImageVisible(BannerImageResponse image) {
+        LocalDateTime now = LocalDateTime.now();
+        boolean activeStatus = image.getStatus() != null && image.getStatus() == 1;
+        boolean inStartWindow = image.getStartTime() == null || !image.getStartTime().isAfter(now);
+        boolean inEndWindow = image.getEndTime() == null || !image.getEndTime().isBefore(now);
+        return activeStatus && inStartWindow && inEndWindow;
+    }
+
+    private Boolean toDeletedFlag(Integer status) {
+        return status != null && status == 0;
+    }
+
+    private Integer toStatus(Boolean isDeleted) {
+        return Boolean.TRUE.equals(isDeleted) ? 0 : 1;
     }
 }

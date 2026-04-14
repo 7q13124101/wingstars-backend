@@ -9,6 +9,8 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import com.wingstars.core.entity.BaseEntity;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,40 +19,37 @@ import java.util.List;
 @Table(name = "banners")
 public class Banner extends BaseEntity {
 
+    @Setter
+    @Getter
     private String title;
-    @Column(name = "link_url")
-    private String linkUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "position_code", nullable = false, length = 50)
     private BannerPosition position;
 
+    @Setter
+    @Getter
+    @Column(name = "duration_ms")
+    private Integer durationMs;
+
+    @Setter
+    @Getter
     private Integer status;
 
+    @Column(name = "display_order")
+    private Short displayOrder;
+
+    @Setter
+    @Getter
     @Column(name = "is_deleted")
     private Boolean isDeleted;
 
+    @Getter
     @OneToMany(mappedBy = "banner", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("displayOrder ASC")
     private List<BannerImage> images = new ArrayList<>();
 
     public Banner() {
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getLinkUrl() {
-        return linkUrl;
-    }
-
-    public void setLinkUrl(String linkUrl) {
-        this.linkUrl = linkUrl;
     }
 
     public BannerPosition getPositionCode() {
@@ -61,24 +60,12 @@ public class Banner extends BaseEntity {
         this.position = position;
     }
 
-    public Integer getStatus() {
-        return status;
+    public Short getDisplayOrder() {
+        return displayOrder;
     }
 
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Boolean getIsDeleted() {
-        return isDeleted;
-    }
-
-    public void setIsDeleted(Boolean isDeleted) {
-        this.isDeleted = isDeleted;
-    }
-
-    public List<BannerImage> getImages() {
-        return images;
+    public void setDisplayOrder(Short displayOrder) {
+        this.displayOrder = displayOrder;
     }
 
     public void setImages(List<BannerImage> images) {

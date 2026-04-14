@@ -10,10 +10,11 @@ import java.time.LocalDateTime;
 public class BannerImageResponse {
     private Long id;
     private String imageUrl;
+    private String linkUrl;
     private Integer displayOrder;
-    private Integer durationMs;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
+    private Integer status;
     private Boolean deleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

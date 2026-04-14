@@ -20,11 +20,12 @@ public class BannerImage extends BaseEntity {
     @Column(name = "image_url", nullable = false, length = 500)
     private String imageUrl;
 
+    @Column(name = "link_url", length = 500)
+    private String linkUrl;
+
     @Column(name = "display_order")
     private Integer displayOrder;
 
-    @Column(name = "duration_ms")
-    private Integer durationMs;
 
     @Column(name = "start_time")
     private LocalDateTime startTime;
@@ -51,6 +52,14 @@ public class BannerImage extends BaseEntity {
         this.imageUrl = imageUrl;
     }
 
+    public String getLinkUrl() {
+        return linkUrl;
+    }
+
+    public void setLinkUrl(String linkUrl) {
+        this.linkUrl = linkUrl;
+    }
+
     public Integer getDisplayOrder() {
         return displayOrder;
     }
@@ -59,13 +68,6 @@ public class BannerImage extends BaseEntity {
         this.displayOrder = displayOrder;
     }
 
-    public Integer getDurationMs() {
-        return durationMs;
-    }
-
-    public void setDurationMs(Integer durationMs) {
-        this.durationMs = durationMs;
-    }
 
     public LocalDateTime getStartTime() {
         return startTime;

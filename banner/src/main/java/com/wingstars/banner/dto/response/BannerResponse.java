@@ -12,9 +12,10 @@ import java.util.List;
 public class BannerResponse {
     private Long id;
     private String title;
-    private String linkUrl;
     private BannerPosition positionCode;
     private Integer status;
+    private Integer durationMs;
+    private Short displayOrder;
     private Boolean deleted;
     private List<BannerImageResponse> images;
     private LocalDateTime createdAt;

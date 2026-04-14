@@ -1,7 +1,6 @@
 package com.wingstars.banner.controller;
 
 import com.wingstars.banner.dto.request.BannerRequest;
-import com.wingstars.banner.dto.request.BannerStatusRequest;
 import com.wingstars.banner.dto.response.BannerResponse;
 import com.wingstars.banner.service.BannerService;
 import com.wingstars.core.payload.ApiResponse;
@@ -30,25 +29,17 @@ public class AdminBannerController {
     private final BannerService bannerService;
 
     @PostMapping
-    @Operation(summary = "Create banner", description = "Create a new banner. New banners are created in off status by default.")
+    @Operation(summary = "Create banner", description = "Create a new banner. positionCode: HOME_TOP or SIDEBAR or EVENT_POPUP")
     public ResponseEntity<ApiResponse<BannerResponse>> create(@Valid @RequestBody BannerRequest request) {
         return ResponseEntity.ok(ApiResponse.success(bannerService.create(request)));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update banner", description = "Update banner information and images. If set to active, other banners in the same position will be turned off.")
+    @Operation(summary = "Update banner", description = "Update banner information and images.")
     public ResponseEntity<ApiResponse<BannerResponse>> update(
             @PathVariable Long id,
             @Valid @RequestBody BannerRequest request) {
         return ResponseEntity.ok(ApiResponse.success(bannerService.update(id, request)));
-    }
-
-    @PatchMapping("/{id}/status")
-    @Operation(summary = "Update banner status", description = "Turn a banner on or off. Only one banner can stay active in the same position.")
-    public ResponseEntity<ApiResponse<BannerResponse>> updateStatus(
-            @PathVariable Long id,
-            @Valid @RequestBody BannerStatusRequest request) {
-        return ResponseEntity.ok(ApiResponse.success(bannerService.updateStatus(id, request.getStatus())));
     }
 
     @PatchMapping("/{id}/restore")
@@ -78,7 +69,7 @@ public class AdminBannerController {
     }
 
     @GetMapping
-    @Operation(summary = "Get active list for admin", description = "Get paginated banner list excluding trashed banners.")
+    @Operation(summary = "Get list for admin", description = "Get paginated banner list excluding trashed banners.")
     public ResponseEntity<ApiResponse<Page<BannerResponse>>> getAll(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int pageSize) {
