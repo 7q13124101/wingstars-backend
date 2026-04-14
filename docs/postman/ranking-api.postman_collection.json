@@ -1,0 +1,116 @@
+{
+  "info": {
+    "_postman_id": "r1a2n3k4-i5n6-4g7a-8p9i-0c1o2l3l4e5c",
+    "name": "Wingstars Ranking API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "categoryId",
+      "value": "1"
+    },
+    {
+      "key": "entryId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Categories",
+          "item": [
+            {
+              "name": "List All Categories",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+                ],
+                "url": { "raw": "{{baseUrl}}/api/admin/ranking/categories" }
+              }
+            },
+            {
+              "name": "Create Category",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Most Popular 2026\",\n  \"typeCode\": \"POPULAR_2026\",\n  \"status\": true\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/api/admin/ranking/categories" }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Entries",
+          "item": [
+            {
+              "name": "Add Cheerleader to Rank",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cheerleaderId\": 1,\n  \"rankPosition\": 1,\n  \"score\": 1500\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/api/admin/ranking/categories/{{categoryId}}/entries" }
+              }
+            },
+            {
+              "name": "Update Entry",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{adminToken}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cheerleaderId\": 1,\n  \"rankPosition\": 2,\n  \"score\": 1200\n}"
+                },
+                "url": { "raw": "{{baseUrl}}/api/admin/ranking/entries/{{entryId}}" }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "List Active Categories",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/public/ranking/categories" }
+          }
+        },
+        {
+          "name": "List Entries in Category",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/public/ranking/categories/{{categoryId}}/entries" }
+          }
+        }
+      ]
+    }
+  ]
+}
