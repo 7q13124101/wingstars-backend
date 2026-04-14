@@ -5,20 +5,18 @@ import com.wingstars.auth.dto.request.AccountUpdateRequest;
 import com.wingstars.auth.dto.response.UserResponse;
 import com.wingstars.auth.service.AccountAdminService;
 import com.wingstars.core.payload.ApiResponse;
+import com.wingstars.core.payload.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/admin/accounts")
@@ -31,7 +29,7 @@ public class AccountAdminController {
 
     @GetMapping
     @Operation(summary = "Get all accounts", description = "Retrieve a paginated list of all user accounts.")
-    public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllAccounts(
+    public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getAllAccounts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
@@ -42,90 +40,38 @@ public class AccountAdminController {
         Sort sort = direction.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
         
-        Page<UserResponse> data = accountAdminService.getAllAccounts(pageable, includeDeleted);
-        
-        ApiResponse<Page<UserResponse>> response = ApiResponse.<Page<UserResponse>>builder()
-                .status(200)
-                .message("Accounts retrieved successfully")
-                .data(data)
-                .timestamp(LocalDateTime.now())
-                .build();
-        
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(accountAdminService.getAllAccounts(pageable, includeDeleted)));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get account detail", description = "Retrieve full information of a specific user account by ID.")
     public ResponseEntity<ApiResponse<UserResponse>> getAccountById(@PathVariable Long id) {
-        UserResponse data = accountAdminService.getAccountById(id);
-        
-        ApiResponse<UserResponse> response = ApiResponse.<UserResponse>builder()
-                .status(200)
-                .message("Account retrieved successfully")
-                .data(data)
-                .timestamp(LocalDateTime.now())
-                .build();
-        
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(accountAdminService.getAccountById(id)));
     }
 
     @PostMapping
     @Operation(summary = "Create internal account", description = "Create a new internal account with specific role (ADMIN, SUPER_ADMIN, etc.)")
     public ResponseEntity<ApiResponse<UserResponse>> createAccount(@RequestBody @Valid AccountCreateRequest request) {
-        UserResponse data = accountAdminService.createAccount(request);
-        
-        ApiResponse<UserResponse> response = ApiResponse.<UserResponse>builder()
-                .status(201)
-                .message("Account created successfully")
-                .data(data)
-                .timestamp(LocalDateTime.now())
-                .build();
-        
-        return ResponseEntity.status(201).body(response);
+        return ResponseEntity.ok(ApiResponse.success(accountAdminService.createAccount(request)));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update account", description = "Update existing user information and role.")
     public ResponseEntity<ApiResponse<UserResponse>> updateAccount(@PathVariable Long id, @RequestBody @Valid AccountUpdateRequest request) {
-        UserResponse data = accountAdminService.updateAccount(id, request);
-        
-        ApiResponse<UserResponse> response = ApiResponse.<UserResponse>builder()
-                .status(200)
-                .message("Account updated successfully")
-                .data(data)
-                .timestamp(LocalDateTime.now())
-                .build();
-        
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(accountAdminService.updateAccount(id, request)));
     }
 
     @DeleteMapping("/{id}/lock")
     @Operation(summary = "Lock account", description = "Soft delete/lock a user account and revoke all their refresh tokens.")
     public ResponseEntity<ApiResponse<Void>> lockAccount(@PathVariable Long id) {
         accountAdminService.lockAccount(id);
-        
-        ApiResponse<Void> response = ApiResponse.<Void>builder()
-                .status(200)
-                .message("Account locked successfully")
-                .data(null)
-                .timestamp(LocalDateTime.now())
-                .build();
-        
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @PostMapping("/{id}/unlock")
     @Operation(summary = "Unlock account", description = "Restore a locked user account.")
     public ResponseEntity<ApiResponse<Void>> unlockAccount(@PathVariable Long id) {
         accountAdminService.unlockAccount(id);
-        
-        ApiResponse<Void> response = ApiResponse.<Void>builder()
-                .status(200)
-                .message("Account unlocked successfully")
-                .data(null)
-                .timestamp(LocalDateTime.now())
-                .build();
-        
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 }

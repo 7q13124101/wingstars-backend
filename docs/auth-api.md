@@ -141,7 +141,7 @@ All APIs return the following structure:
 {
   "status": 200,
   "message": "Success message",
-  "data": { ... },
+  "data": {  },
   "timestamp": "2026-04-14T..."
 }
 ```

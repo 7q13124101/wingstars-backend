@@ -10,6 +10,8 @@ import com.wingstars.auth.repository.RoleRepository;
 import com.wingstars.auth.repository.UserRepository;
 import com.wingstars.auth.service.AccountAdminService;
 import com.wingstars.core.exception.BusinessException;
+import com.wingstars.core.mapper.PageMapper;
+import com.wingstars.core.payload.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -30,14 +32,14 @@ public class AccountAdminServiceImpl implements AccountAdminService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<UserResponse> getAllAccounts(Pageable pageable, Boolean includeDeleted) {
+    public PageResponse<UserResponse> getAllAccounts(Pageable pageable, Boolean includeDeleted) {
         Page<User> users;
         if (Boolean.TRUE.equals(includeDeleted)) {
             users = userRepository.findAll(pageable);
         } else {
             users = userRepository.findByDeletedFalse(pageable);
         }
-        return users.map(this::convertToResponse);
+        return PageMapper.toPageResponse(users.map(this::convertToResponse));
     }
 
     @Override
