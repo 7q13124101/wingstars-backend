@@ -17,32 +17,47 @@ public class MediaMaintenanceServiceImpl implements MediaMaintenanceService {
 
     @Override
     @Transactional
-    public int updateFileUrlsWithHost(String host, int execute) {
+    public int updateFileUrlsWithHost(String protocol, String host, String port, int execute) {
         if (execute != 1) {
             return 0;
         }
 
-        List<MediaAsset> assets = mediaAssetRepository.findAllWithRelativePath();
+        List<MediaAsset> assets = mediaAssetRepository.findAllByIsDeletedFalse();
         int count = 0;
-        
-        // Ensure host doesn't end with / if fileUrl starts with /
-        String normalizedHost = host;
-        if (normalizedHost.endsWith("/")) {
-            normalizedHost = normalizedHost.substring(0, normalizedHost.length() - 1);
+
+        StringBuilder prefixBuilder = new StringBuilder();
+        if (host != null && !host.trim().isEmpty()) {
+            String selectedProtocol = (protocol != null && !protocol.trim().isEmpty()) ? protocol.trim() : "http";
+            if (!selectedProtocol.endsWith("://")) {
+                prefixBuilder.append(selectedProtocol).append("://");
+            } else {
+                prefixBuilder.append(selectedProtocol);
+            }
+            
+            prefixBuilder.append(host.trim());
+            if (port != null && !port.trim().isEmpty()) {
+                prefixBuilder.append(":").append(port.trim());
+            }
         }
+        String newPrefix = prefixBuilder.toString();
 
         for (MediaAsset asset : assets) {
             String currentUrl = asset.getFileUrl();
-            if (!currentUrl.startsWith("http")) {
-                if (!currentUrl.startsWith("/")) {
-                    currentUrl = "/" + currentUrl;
+            if (currentUrl == null) continue;
+
+            int uploadIndex = currentUrl.indexOf("/uploads/");
+            if (uploadIndex != -1) {
+                String relativePath = currentUrl.substring(uploadIndex);
+                String newUrl = newPrefix + relativePath;
+
+                if (!newUrl.equals(currentUrl)) {
+                    asset.setFileUrl(newUrl);
+                    mediaAssetRepository.save(asset);
+                    count++;
                 }
-                asset.setFileUrl(normalizedHost + currentUrl);
-                mediaAssetRepository.save(asset);
-                count++;
             }
         }
-        
+
         return count;
     }
 }

@@ -1,5 +1,5 @@
 package com.wingstars.media.service;
 
 public interface MediaMaintenanceService {
-    int updateFileUrlsWithHost(String host, int execute);
+    int updateFileUrlsWithHost(String protocol, String host, String port, int execute);
 }

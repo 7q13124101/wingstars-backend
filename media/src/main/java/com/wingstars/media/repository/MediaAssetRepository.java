@@ -16,6 +16,8 @@ import java.util.Optional;
 public interface MediaAssetRepository extends JpaRepository<MediaAsset, Long> {
     Optional<MediaAsset> findByIdAndIsDeletedFalse(Long id);
 
+    List<MediaAsset> findAllByIsDeletedFalse();
+
     Page<MediaAsset> findAllByIsDeletedFalse(Pageable pageable);
 
     Page<MediaAsset> findByModuleSourceAndIsDeletedFalse(ModuleSource moduleSource, Pageable pageable);
